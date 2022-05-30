@@ -26,6 +26,8 @@ public class AccountController : ControllerBase
         _userHelper = userHelper;
         _configuration = configuration;
     }
+  
+
 
     [HttpPost]
     [Route("CreateToken")]
@@ -86,5 +88,7 @@ public class AccountController : ControllerBase
 
         return Ok(user);
     }
+   
+
 
 }

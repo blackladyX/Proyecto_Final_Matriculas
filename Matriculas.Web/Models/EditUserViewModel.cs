@@ -1,12 +1,13 @@
-﻿using Matriculas.Web.Enums;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Matriculas.Web.Data.Entities
+namespace Matriculas.Web.Models
 {
-    public class User : IdentityUser
+    public class EditUserViewModel
     {
+        public string Id { get; set; }
+
         [MaxLength(20)]
         [Required]
         public string Document { get; set; }
@@ -24,24 +25,25 @@ namespace Matriculas.Web.Data.Entities
         [MaxLength(100)]
         public string Address { get; set; }
 
+        [Display(Name = "Phone Number")]
+        [MaxLength(20)]
+        public string PhoneNumber { get; set; }
+
         [Display(Name = "Image")]
         public Guid ImageId { get; set; }
 
-        //TODO: Pending to put the correct paths
         [Display(Name = "Image")]
         public string ImageFullPath => ImageId == Guid.Empty
-            ? $"https://matriculasweb20220520201641.azurewebsites.net/images/noimage.png"
+
+         ? $"https://matriculasweb20220520201641.azurewebsites.net/images/noimage.png"
             : $"https://matriculasdemo1.blob.core.windows.net/users/{ImageId}";
+        [Display(Name = "Image")]
+        public IFormFile ImageFile { get; set; }
 
-        [Display(Name = "User Type")]
-        public UserType UserType { get; set; }
 
 
-        [Display(Name = "User")]
-        public string FullName => $"{FirstName} {LastName}";
 
-        [Display(Name = "User")]
-        public string FullNameWithDocument => $"{FirstName} {LastName} - {Document}";
+
     }
 
 }

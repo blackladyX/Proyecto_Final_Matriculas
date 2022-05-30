@@ -154,6 +154,9 @@ namespace Matriculas.Web.Controllers
             model.Categories = _combosHelper.GetComboCategories();
             return View(model);
         }
+
+
+     
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -234,7 +237,7 @@ namespace Matriculas.Web.Controllers
 
                 try
                 {
-                    Guid imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "Products");
+                    Guid imageId = await _blobHelper.UploadBlobAsync(model.ImageFile, "products");
                     if (product.ProductImages == null)
                     {
                         product.ProductImages = new List<ProductImage>();

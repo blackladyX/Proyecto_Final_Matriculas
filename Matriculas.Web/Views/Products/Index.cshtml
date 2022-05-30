@@ -93,17 +93,18 @@
 <partial name="_DeleteDialog" />
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>    
 <script src="/js/deleteDialog.js"></script>
 
-    <script type="text/javascript">
-        $(document).ready(function () {
+    <script type="text/javascript"> $(document).ready(function ()
+    {
             $('#MyTable').DataTable();
 
             // Delete item
           
-            sc_deleteDialog.openModal('deleteItem', true, 'btnYesDelete', '/Products/DeleteImage/', false);
+            sc_deleteDialog.openModal('deleteItem', true, 'btnYesDelete', '/Products/Delete/', false);
         });
     </script>
 }

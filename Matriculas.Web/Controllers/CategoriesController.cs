@@ -131,6 +131,8 @@ namespace Matriculas.Web.Controllers
 
             return View(model);
         }
+
+        
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -157,6 +159,9 @@ namespace Matriculas.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+
+       
 
 
 

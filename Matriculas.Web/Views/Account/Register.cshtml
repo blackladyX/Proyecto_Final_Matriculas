@@ -36,14 +36,21 @@
             <div class="form-group">
                 <input type="submit" value="Register" class="btn btn-primary" />
             </div>
+
         </form>
+
+         <div class="text-success">
+    <p>
+        @ViewBag.Message
+    </p>
     </div>
+</div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script type="text/javascript">
-     /*   $(document).ready(function () {
+   <script type="text/javascript">
+  /*     $(document).ready(function () {
            $("#CountryId").change(function () {
                 $("#DepartmentId").empty();
                 $("#DepartmentId").append('<option value="0">[Select a department...]</option>');
@@ -91,5 +98,6 @@
                 return false;
             });
         };*/
+
     </script>
 }

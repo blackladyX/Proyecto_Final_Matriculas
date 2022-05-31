@@ -30,6 +30,9 @@ namespace Matriculas.Web.Data
         {
             await _userHelper.CheckRoleAsync(UserType.Admin.ToString());
             await _userHelper.CheckRoleAsync(UserType.User.ToString());
+           
+
+
         }
 
         private async Task<User> CheckUserAsync(
@@ -59,6 +62,10 @@ namespace Matriculas.Web.Data
 
                 await _userHelper.AddUserAsync(user, "123456"); //password debe tener una longitud de 6 caracteres
                 await _userHelper.AddUserToRoleAsync(user, userType.ToString());
+
+                string token = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+                await _userHelper.ConfirmEmailAsync(user, token);
+
             }
 
             return user;

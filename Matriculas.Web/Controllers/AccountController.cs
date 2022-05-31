@@ -1,6 +1,4 @@
-﻿
-
-namespace Matriculas.Web.Controllers
+﻿namespace Matriculas.Web.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
     using System.Linq;
@@ -11,6 +9,8 @@ namespace Matriculas.Web.Controllers
     using Matriculas.Web.Data.Entities;
     using System;
     using Matriculas.Web.Enums;
+    using Microsoft.AspNetCore.Identity;
+    using Azure;
 
     public class AccountController : Controller
     {
@@ -18,14 +18,17 @@ namespace Matriculas.Web.Controllers
         private readonly IUserHelper _userHelper;
         private readonly ICombosHelper _combosHelper;
         private readonly IBlobHelper _blobHelper;
+        private readonly IMailHelper _mailHelper;
 
 
-        public AccountController( ApplicationDbContext context, IUserHelper userHelper, ICombosHelper combosHelper, IBlobHelper blobHelper)
+        public AccountController( ApplicationDbContext context, IUserHelper userHelper, ICombosHelper combosHelper, IBlobHelper blobHelper, IMailHelper mailHelper)
         {
             _context = context;
             _userHelper = userHelper;
             _combosHelper = combosHelper;
             _blobHelper = blobHelper;
+            _mailHelper = mailHelper;
+            
         }
 
 
@@ -104,27 +107,31 @@ namespace Matriculas.Web.Controllers
                     model.Cities = _combosHelper.GetComboCities(model.DepartmentId);*/
                     return View(model);
                 }
-
-                LoginViewModel loginViewModel = new LoginViewModel
+                string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+                string tokenLink = Url.Action("ConfirmEmail", "Account", new
                 {
-                    Password = model.Password,
-                    RememberMe = false,
-                    Username = model.Username
-                };
+                    userid = user.Id,
+                    token = myToken
+                }, protocol: HttpContext.Request.Scheme);
 
-                var result2 = await _userHelper.LoginAsync(loginViewModel);
-
-                if (result2.Succeeded)
+                Response response = _mailHelper.SendMail(model.Username, "Email confirmation", $"<h1>Email Confirmation</h1>" +
+                    $"To allow the user, " +
+                    $"plase click in this link:</br></br><a href = \"{tokenLink}\">Confirm Email</a>");
+                if (response.IsSuccess)
                 {
-                    return RedirectToAction("Index", "Home");
+                    ViewBag.Message = "The instructions to allow your user has been sent to email.";
+                    return View(model);
                 }
+
+                ModelState.AddModelError(string.Empty, response.Message);
             }
 
-           /* model.Countries = _combosHelper.GetComboCountries();
+           /*model.Countries = _combosHelper.GetComboCountries();
             model.Departments = _combosHelper.GetComboDepartments(model.CountryId);
             model.Cities = _combosHelper.GetComboCities(model.DepartmentId);*/
             return View(model);
         }
+
 
 
         /*public JsonResult GetDepartments(int countryId)
@@ -225,6 +232,120 @@ namespace Matriculas.Web.Controllers
             model.Departments = _combosHelper.GetComboDepartments(model.CityId);*/
             return View(model);
         }
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserAsync(User.Identity.Name);
+                if (user != null)
+                {
+                    var result = await _userHelper.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("ChangeUser");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, result.Errors.FirstOrDefault().Description);
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "User no found.");
+                }
+            }
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return NotFound();
+            }
+
+            User user = await _userHelper.GetUserAsync(new Guid(userId));
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            IdentityResult result = await _userHelper.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                return NotFound();
+            }
+
+            return View();
+        }
+        public IActionResult RecoverPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RecoverPassword(RecoverPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                User user = await _userHelper.GetUserAsync(model.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "The email doesn't correspont to a registered user.");
+                    return View(model);
+                }
+
+                string myToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
+                string link = Url.Action(
+                    "ResetPassword",
+                    "Account",
+                    new { token = myToken }, protocol: HttpContext.Request.Scheme);
+                _mailHelper.SendMail(model.Email, "Password Reset", $"<h1>Password Reset</h1>" +
+                    $"To reset the password click in this link:</br></br>" +
+                    $"<a href = \"{link}\">Reset Password</a>");
+                ViewBag.Message = "The instructions to recover your password has been sent to email.";
+                return View();
+
+            }
+
+            return View(model);
+        }
+
+        public IActionResult ResetPassword(string token)
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            User user = await _userHelper.GetUserAsync(model.UserName);
+            if (user != null)
+            {
+                IdentityResult result = await _userHelper.ResetPasswordAsync(user, model.Token, model.Password);
+                if (result.Succeeded)
+                {
+                    ViewBag.Message = "Password reset successful.";
+                    return View();
+                }
+
+                ViewBag.Message = "Error while resetting the password.";
+                return View(model);
+            }
+
+            ViewBag.Message = "User not found.";
+            return View(model);
+        }
+
+
+
 
     }
 }

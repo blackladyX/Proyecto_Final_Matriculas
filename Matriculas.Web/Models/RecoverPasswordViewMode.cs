@@ -1,14 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace Matriculas.Web.Request
+
+namespace Matriculas.Web.Models
 {
-    public class EmailRequest
+    public class RecoverPasswordViewModel
     {
-
-
-        [EmailAddress]
         [Required]
+        [EmailAddress]
         public string Email { get; set; }
-
     }
 
 }

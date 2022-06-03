@@ -18,16 +18,16 @@
         private readonly IUserHelper _userHelper;
         private readonly ICombosHelper _combosHelper;
         private readonly IBlobHelper _blobHelper;
-        private readonly IMailHelper _mailHelper;
+        
 
 
-        public AccountController( ApplicationDbContext context, IUserHelper userHelper, ICombosHelper combosHelper, IBlobHelper blobHelper, IMailHelper mailHelper)
+        public AccountController( ApplicationDbContext context, IUserHelper userHelper, ICombosHelper combosHelper, IBlobHelper blobHelper)
         {
             _context = context;
             _userHelper = userHelper;
             _combosHelper = combosHelper;
             _blobHelper = blobHelper;
-            _mailHelper = mailHelper;
+         
             
         }
 
@@ -114,16 +114,13 @@
                     token = myToken
                 }, protocol: HttpContext.Request.Scheme);
 
-                Response response = _mailHelper.SendMail(model.Username, "Email confirmation", $"<h1>Email Confirmation</h1>" +
-                    $"To allow the user, " +
-                    $"plase click in this link:</br></br><a href = \"{tokenLink}\">Confirm Email</a>");
-                if (response.IsSuccess)
+                
                 {
                     ViewBag.Message = "The instructions to allow your user has been sent to email.";
                     return View(model);
                 }
 
-                ModelState.AddModelError(string.Empty, response.Message);
+                
             }
 
            /*model.Countries = _combosHelper.GetComboCountries();
@@ -303,15 +300,7 @@
                 }
 
                 string myToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
-                string link = Url.Action(
-                    "ResetPassword",
-                    "Account",
-                    new { token = myToken }, protocol: HttpContext.Request.Scheme);
-                _mailHelper.SendMail(model.Email, "Password Reset", $"<h1>Password Reset</h1>" +
-                    $"To reset the password click in this link:</br></br>" +
-                    $"<a href = \"{link}\">Reset Password</a>");
-                ViewBag.Message = "The instructions to recover your password has been sent to email.";
-                return View();
+               
 
             }
 

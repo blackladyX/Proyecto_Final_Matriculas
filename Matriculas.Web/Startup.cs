@@ -78,7 +78,7 @@ public class Startup
         services.AddScoped<IConverterHelper, ConverterHelper>();
         services.AddScoped<ICombosHelper, CombosHelper>();
         services.AddScoped<IUserHelper, UserHelper>();
-        services.AddScoped<IMailHelper, MailHelper>();
+      /*  services.AddScoped<IMailHelper, MailHelper>();*/
         services.AddControllersWithViews();
     }
 
